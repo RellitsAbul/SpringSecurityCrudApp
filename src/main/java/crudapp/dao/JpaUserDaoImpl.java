@@ -22,9 +22,15 @@ public class JpaUserDaoImpl implements UserDao {
     }
 
     @Override
-    public User get(long id) {
+    public User getById(long id) {
         TypedQuery<User> q = entityManager.createQuery("select u from User u  where u.id=:id", User.class);
         q.setParameter("id", id);
+        return q.getResultList().stream().findAny().orElse(null);
+    }
+
+    public User getByUsername(String username) {
+        TypedQuery<User> q = entityManager.createQuery("select u from User u  where u.username=:username", User.class);
+        q.setParameter("username", username);
         return q.getResultList().stream().findAny().orElse(null);
     }
 
@@ -35,7 +41,7 @@ public class JpaUserDaoImpl implements UserDao {
 
     @Override
     public void update(long id, User updateUser) {
-        User userToBeUpdater = get(id);
+        User userToBeUpdater = getById(id);
         userToBeUpdater.setName(updateUser.getName());
         userToBeUpdater.setLastName(updateUser.getLastName());
         userToBeUpdater.setEmail(updateUser.getEmail());

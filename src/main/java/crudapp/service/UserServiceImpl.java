@@ -1,8 +1,12 @@
 package crudapp.service;
 
 import crudapp.dao.UserDao;
+import crudapp.models.Role;
 import crudapp.models.User;
-import org.springframework.beans.factory.annotation.Qualifier;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.security.core.userdetails.UserDetails;
+import org.springframework.security.core.userdetails.UsernameNotFoundException;
+import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -11,16 +15,17 @@ import java.util.List;
 @Service
 @Transactional
 public class UserServiceImpl implements UserService {
-    final
-    UserDao userDao;
+    private final UserDao userDao;
+    @Autowired
+    BCryptPasswordEncoder bCryptPasswordEncoder;
 
     public UserServiceImpl(UserDao userDao) {
         this.userDao = userDao;
     }
 
     @Override
-    public User get(long id) {
-        return userDao.get(id);
+    public User getById(long id) {
+        return userDao.getById(id);
     }
 
 
@@ -30,18 +35,49 @@ public class UserServiceImpl implements UserService {
     }
 
     @Override
-    public void add(User user) {
-        userDao.add(user);
+    public boolean add(User user) {
+        User userFromDB = userDao.getByUsername(user.getUsername());
 
+        if (userFromDB != null) {
+            return false;
+        } else {
+            userDao.add(user);
+            user.getRoles().add(new Role(1L, "ROLE_USER"));
+            user.setPassword(bCryptPasswordEncoder.encode(user.getPassword()));
+            return true;
+        }
     }
 
     @Override
-    public void update(long id, User user) {
-        userDao.update(id, user);
+    public boolean update(long id, User user) {
+        User userFromDB = userDao.getByUsername(user.getUsername());
+        if (userDao.getById(id) == null) {
+            return false;
+        } else if (userFromDB != null && userFromDB.getId() != id) {
+            return false;
+        } else {
+            userDao.update(id, user);
+            return true;
+        }
     }
 
     @Override
-    public void delete(long id) {
-        userDao.delete(id);
+    public boolean delete(long id) {
+        if (userDao.getById(id) != null) {
+            userDao.delete(id);
+            return true;
+        }
+        return false;
+    }
+
+    @Override
+    public UserDetails loadUserByUsername(String username) throws UsernameNotFoundException {
+        User user = userDao.getByUsername(username);
+
+        if (user == null) {
+            throw new UsernameNotFoundException("User not found");
+        }
+
+        return user;
     }
 }

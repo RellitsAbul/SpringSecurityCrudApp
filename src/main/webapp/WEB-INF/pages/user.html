@@ -1,6 +1,7 @@
 <!DOCTYPE html>
 <html lang="en" xmlns="http://www.w3.org/1999/xhtml"
-      xmlns:th="http://www.thymeleaf.org">
+      xmlns:th="http://www.thymeleaf.org"
+      xmlns:sec="http://www.thymeleaf.org/extras/spring-security">
 <head>
     <meta charset="UTF-8">
     <title>User</title>
@@ -10,11 +11,17 @@
 <p th:text="${user.getName()}">VALUE</p>
 <p th:text="${user.getLastName()}">VALUE</p>
 <p th:text="${user.getEmail()}">VALUE</p>
-<a th:href="@{/users}">all users</a>
+<div sec:authorize="hasAuthority('ROLE_ADMIN')"><a th:href="@{/admin/users}">all users</a></div>
 <br/>
-<a th:href="@{/users/{id}/edit(id=${user.getId()})}">edit user</a>
-<form th:method="delete" th:action="@{/users/{id}(id=${user.getId()})}">
-    <input type="submit" value="Delete!">
+<div sec:authorize="hasAuthority('ROLE_ADMIN')"><a th:href="@{/admin/users/{id}/edit(id=${user.getId()})}">edit user</a>
+</div>
+<div sec:authorize="hasAuthority('ROLE_ADMIN')">
+    <form th:method="delete" th:action="@{/admin/users/{id}(id=${user.getId()})}">
+        <input type="submit" value="Delete!">
+    </form>
+</div>
+<form th:action="@{/logout}" method="post">
+    <button type="submit">Sign Out</button>
 </form>
 </body>
 </html>

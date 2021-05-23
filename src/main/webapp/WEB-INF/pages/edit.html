@@ -6,7 +6,7 @@
     <title>Edit user</title>
 </head>
 <body>
-<form th:method="PATCH" th:action="@{/users/{id}(id=${user.getId()})}" th:object="${user}">
+<form th:method="PATCH" th:action="@{/admin/users/{id}(id=${user.getId()})}" th:object="${user}">
     <label for="name">name</label>
     <input type="text" th:field="*{name}" id="name">
     <br/>
@@ -17,6 +17,10 @@
     <input type="text" th:field="*{email}" id="email">
     <br/>
     <input type="submit" value="Update!">
+
+    <form th:action="@{/logout}" method="post">
+        <button type="submit">Sign Out</button>
+    </form>
 
 </form>
 </body>
